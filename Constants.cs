@@ -17,5 +17,8 @@ namespace uia_test_console
         public const string SnapLayoutTopRightQuarter = "Top right quarter, 50% width, 50% height";
 
         public const string SnapLayoutBottomRightQuarter = "Bottom right quarter, 50% width, 50% height";
+
+        public const int TimeBetweenSnaps = 1000;
+
     }
 }

@@ -18,9 +18,10 @@ namespace uia_test_console
         {
 
 
-            
+           // Process.Start(@"C:\Program Files (x86)\Windows Application Driver\WinAppDriver.exe");
             var snapResult = SnapLayoutAppSizeSupport.launchApplication(@"C:\Windows\System32\notepad.exe");
-
+            Console.ReadKey();
+            /*
             var process = Process.Start("notepad.exe");
             var id = process.Id;
                 int ct = 0;
@@ -64,8 +65,10 @@ namespace uia_test_console
                 double height = rectTitleBar.Height;
                 double h = rectTitleBar.Bottom - rectTitleBar.Top;
                 var titleBarName = titleBar.Current.Name;
+
+                */
                 // titleBar.Current.n
-            }
+            
         }
     }
 }
