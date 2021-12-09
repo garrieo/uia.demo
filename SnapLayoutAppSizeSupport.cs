@@ -32,12 +32,12 @@ namespace uia_test_console
                 var notePadSource = notePadSession.PageSource;
 
 
-                var maxButton = notePadSession.FindElementByName("Maximize");
-                //var maxButton = notePadSession.FindElementByName("Restore");
+                //var maxButton = notePadSession.FindElementByName("Maximize");
+                ////var maxButton = notePadSession.FindElementByName("Restore");
 
 
-                var action = new Actions(notePadSession);
-                action.MoveToElement(maxButton).MoveByOffset(5, 5).Build().Perform();
+                //var action = new Actions(notePadSession);
+                //action.MoveToElement(maxButton).MoveByOffset(5, 5).Build().Perform();
 
                 //System.Threading.Thread.Sleep(1000);
 
@@ -46,11 +46,15 @@ namespace uia_test_console
                 deskTopOptions.AddAdditionalCapability("app", "Root");
                 var deskTopSession = new WindowsDriver<WindowsElement>(new Uri("http://127.0.0.1:4723"), deskTopOptions);
 
-                var popHostElement = deskTopSession.FindElementByName("PopupHost");
-                var popUpElement = popHostElement.FindElementByName("Popup");
-                var snapLayOutElement = popUpElement.FindElementByName("Snap Layouts Menu");
 
-                var windowSize = notePadSession.Manage().Window.Size;
+                SnapToLocation(notePadSession,deskTopSession, "", Constants.SnapLayoutLeftHalf50);
+                var windowSize50 = notePadSession.Manage().Window.Size;
+                var windowLocation50 = notePadSession.Manage().Window.Position;
+
+                SnapToLocation(notePadSession, deskTopSession, "", Constants.SnapLayoutRight40);
+
+                var windowSize60 = notePadSession.Manage().Window.Size;
+                var windowLocation60 = notePadSession.Manage().Window.Position;
                 /*   
                  *   notePadSession.Manage().Window.Position
                  *   notePadSession.Manage().Window.Maximize()
@@ -61,29 +65,51 @@ namespace uia_test_console
 
                  */
 
-                var snapLayoutAction = new Actions(deskTopSession);
-
-                var twoWindowSplitGroup = snapLayOutElement.FindElementByName("2 window split layout");
-                var twoWindowSplitGroupButton = snapLayOutElement.FindElementByName("Left half, 50% width, 100% height");
-                snapLayoutAction.Click(twoWindowSplitGroupButton).Build().Perform();
-
-                var twoWindowLeftLayoutGroup = snapLayOutElement.FindElementByName("2 window focus on left layout");
 
 
-                snapLayoutAction.MoveToElement(twoWindowLeftLayoutGroup).Build().Perform();
+                var twoWindowSplitGroupPosition = notePadSession.Manage().Window.Position;
+                var twoWindowSplitGroupSize = notePadSession.Manage().Window.Size;
 
+              
 
-                snapLayoutAction.MoveToElement(twoWindowSplitGroup).Build().Perform();
+                //  snapLayoutAction.MoveToElement(twoWindowLeftLayoutGroup).Build().Perform();
+                //  snapLayoutAction.MoveToElement(twoWindowSplitGroup).Build().Perform();
 
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message + "\n" + e.StackTrace);
             }
-         
+
             return 0;
         }
 
+        public static void SnapToLocation(WindowsDriver<WindowsElement> notePadSession,
+            WindowsDriver<WindowsElement> deskTopSession, string snapLayoutParent, string snapLayOutTarget)
+        {
+            var maxButton = notePadSession.FindElementByName("Maximize");
+            ///var maxButton = notePadSession.FindElementByName("Restore");
 
+
+            var action = new Actions(notePadSession);
+            action.MoveToElement(maxButton).MoveByOffset(5, 5).Build().Perform();
+
+           
+
+            deskTopSession.CloseApp();         deskTopSession.LaunchApp();
+            var popHostElement = deskTopSession.FindElementByName("PopupHost");
+            var popUpElement = popHostElement.FindElementByName("Popup");
+            var snapLayOutElement = popUpElement.FindElementByName(Constants.SnapLayOutMenu);
+
+
+            var snapLayoutAction = new Actions(deskTopSession);
+
+            //var twoWindowSplitGroup = snapLayOutElement.FindElementByName("2 window split layout");
+            var twoWindowSplitGroupButton = snapLayOutElement.FindElementByName(snapLayOutTarget);
+
+            snapLayoutAction.Click(twoWindowSplitGroupButton).Build().Perform();
+        }
     }
+
+
 }
