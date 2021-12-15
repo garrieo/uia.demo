@@ -18,8 +18,13 @@ namespace uia_test_console
         {
 
 
-           // Process.Start(@"C:\Program Files (x86)\Windows Application Driver\WinAppDriver.exe");
-            var snapResult = SnapLayoutAppSizeSupport.launchApplication(@"C:\Windows\System32\notepad.exe");
+            // Process.Start(@"C:\Program Files (x86)\Windows Application Driver\WinAppDriver.exe");
+
+            //C:\Program Files\WindowsApps\Microsoft.WindowsCalculator_11.2109.9.0_x64__8wekyb3d8bbwe\CalculatorApp.exe
+
+            var appPath = @"C:\Windows\System32\notepad.exe";
+            //  var appPath = @"Microsoft.WindowsCalculator_8wekyb3d8bbwe!App";
+            var snapResult = SnapLayoutAppSizeSupport.launchApplication(appPath);
             Console.ReadKey();
             /*
             var process = Process.Start("notepad.exe");

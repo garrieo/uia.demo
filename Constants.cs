@@ -12,6 +12,8 @@ namespace uia_test_console
 
         public const string SnapLayoutLeftHalf50 = "Left half, 50% width, 100% height";
 
+        public const string SnapLayoutOneThird = "Left third, 33% width, 100% height";
+
         public const string SnapLayoutRight40 = "Right, 40% width, 100% height";
 
         public const string SnapLayoutTopRightQuarter = "Top right quarter, 50% width, 50% height";

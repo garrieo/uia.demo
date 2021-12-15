@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace uia_test_console
 {
@@ -18,13 +19,15 @@ namespace uia_test_console
         {
             try
             {
+                
                 AppiumOptions options = new AppiumOptions();
-                options.AddAdditionalCapability("app", @"C:\Windows\System32\notepad.exe");
+                options.AddAdditionalCapability("app", path);
+
 
                 var notePadSession = new WindowsDriver<WindowsElement>(new Uri("http://127.0.0.1:4723"), options);
 
 
-               notePadSession.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(2000);
+                notePadSession.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(2000);
                 //var maxWindowAction = new Actions(notePadSession);
                 //maxWindowAction.SendKeys(Keys.Command + Keys.ArrowUp + Keys.Command).Build().Perform();
 
@@ -37,38 +40,48 @@ namespace uia_test_console
                 var deskTopSession = new WindowsDriver<WindowsElement>(new Uri("http://127.0.0.1:4723"), deskTopOptions);
 
 
+                notePadSession.Manage().Window.Maximize();
+                var notePadFullScreenDimensi = notePadSession.Manage().Window.Size;
+
+                notePadSession.Manage().Window.Size = new System.Drawing.Size { Height = 540, Width = 960 };
                 deskTopSession.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(2000);
 
 
-                SnapToLocation(notePadSession, deskTopSession, "", Constants.SnapLayoutLeftHalf50);
+                int paneCount = 0;
+                SnapToLocation(notePadSession, deskTopSession, "Snap Layouts Menu", MeasurementType.Half, out paneCount);
                 var windowSize50 = notePadSession.Manage().Window.Size;
                 var windowLocation50 = notePadSession.Manage().Window.Position;
                 LogToConsole(windowSize50, windowLocation50, Constants.SnapLayoutLeftHalf50);
 
+                bool isSixPaneLayout = paneCount == 6;
+                var isHalfSizeValid = IsAppDimensionValid(windowSize50, notePadFullScreenDimensi, MeasurementType.Half, isSixPaneLayout);
+                var isHalfLocationValid = IsAppLocationValid(windowLocation50, notePadFullScreenDimensi, SnapLocation.Left);
                 System.Threading.Thread.Sleep(Constants.TimeBetweenSnaps);
 
+                                               
 
-                SnapToLocation(notePadSession, deskTopSession, "", Constants.SnapLayoutRight40);
-                var windowSize60 = notePadSession.Manage().Window.Size;
-                var windowLocation60 = notePadSession.Manage().Window.Position;
-                LogToConsole(windowSize60, windowLocation60, Constants.SnapLayoutRight40);
-                System.Threading.Thread.Sleep(Constants.TimeBetweenSnaps);
-
-                SnapToLocation(notePadSession, deskTopSession, "3 window focus on left layout", Constants.SnapLayoutTopRightQuarter);
-                var windowSizequarterTop = notePadSession.Manage().Window.Size;
-                var windowLocationquarterTop = notePadSession.Manage().Window.Position;
-                LogToConsole(windowSizequarterTop, windowLocationquarterTop, Constants.SnapLayoutTopRightQuarter);
+                SnapToLocation(notePadSession, deskTopSession, "3 window focus on left layout", MeasurementType.OneThird, out paneCount);
+                var windowSizeThirdTop = notePadSession.Manage().Window.Size;
+                var windowLocationThird = notePadSession.Manage().Window.Position;
+                LogToConsole(windowSizeThirdTop, windowLocationThird, Constants.SnapLayoutTopRightQuarter);
+                var isThirdSizeValid = IsAppDimensionValid(windowSizeThirdTop, notePadFullScreenDimensi, MeasurementType.OneThird, isSixPaneLayout);
+                SnapLocation location = isSixPaneLayout ? SnapLocation.Left : SnapLocation.Center;
+                var isThirdLocationValid = IsAppLocationValid(windowLocationThird, notePadFullScreenDimensi,location);
 
                 System.Threading.Thread.Sleep(Constants.TimeBetweenSnaps);
 
-                SnapToLocation(notePadSession, deskTopSession, "4 window grid layout", Constants.SnapLayoutBottomRightQuarter);
+                SnapToLocation(notePadSession, deskTopSession, "4 window grid layout",MeasurementType.Quarter, out paneCount);
                 var windowSizeQuarterBottom = notePadSession.Manage().Window.Size;
                 var windowLocationQuarterBottom = notePadSession.Manage().Window.Position;
+                var iQuarterSizeValid = IsAppDimensionValid(windowSizeQuarterBottom, notePadFullScreenDimensi, MeasurementType.Half, isSixPaneLayout);
+                var isQuarterLocationValid = IsAppLocationValid(windowLocationQuarterBottom, notePadFullScreenDimensi, SnapLocation.BottomRight);
                 LogToConsole(windowSizeQuarterBottom, windowLocationQuarterBottom, Constants.SnapLayoutBottomRightQuarter);
 
-                notePadSession.FindElementByName("Maximize").Click();
+                //notePadSession.FindElementByName("Maximize").Click();
 
-                var notePadFullScreenDimensi = notePadSession.Manage().Window.Size;
+
+                deskTopSession.CloseApp(); deskTopSession.LaunchApp();
+                var deskTopSize = deskTopSession.Manage();//.Window.Size;
 
             }
             catch (Exception e)
@@ -80,32 +93,58 @@ namespace uia_test_console
         }
 
         public static void SnapToLocation(WindowsDriver<WindowsElement> notePadSession,
-            WindowsDriver<WindowsElement> deskTopSession, string snapLayoutParent, string snapLayOutTarget)
+            WindowsDriver<WindowsElement> deskTopSession, string snapLayoutParent, MeasurementType snapLayOutTarget, out int paneCount)
         {
-           // notePadSession.CloseApp(); notePadSession.LaunchApp();
+            // notePadSession.CloseApp(); notePadSession.LaunchApp();
             var maxButton = notePadSession.FindElementByName("Maximize");
 
+
+
             var action = new Actions(notePadSession);
+            //action.SendKeys(Keys.Command + "z" + Keys.Command).Build().Perform();
             action.MoveToElement(maxButton).MoveByOffset(5, 5).Build().Perform();
 
 
+            System.Threading.Thread.Sleep(Constants.TimeBetweenSnaps);
 
             deskTopSession.CloseApp(); deskTopSession.LaunchApp();
 
             var popHostElement = deskTopSession.FindElementByName("PopupHost");
             var popUpElement = popHostElement.FindElementByName("Popup");
-            var snapLayOutElement = popUpElement.FindElementByName(Constants.SnapLayOutMenu);
+            var snapLayOutMenuElement = popUpElement.FindElementByName(Constants.SnapLayOutMenu);
 
-            AppiumWebElement snapLayOutButton;
+
+            var collection = snapLayOutMenuElement.FindElementsByClassName("NamedContainerAutomationPeer");
+            paneCount = collection.Count();
+
+            AppiumWebElement snapLayOutButton = null;
             var snapLayoutActionMove = new Actions(deskTopSession);
             var snapLayoutActionClick = new Actions(deskTopSession);
 
-            if (String.IsNullOrEmpty(snapLayoutParent))
-                snapLayOutButton = snapLayOutElement.FindElementByName(snapLayOutTarget);
-            else
+            if (snapLayOutTarget == MeasurementType.Half)
             {
-                var parent = snapLayOutElement.FindElementByName(snapLayoutParent);
-                snapLayOutButton = parent.FindElementByName(snapLayOutTarget);
+                var parent = snapLayOutMenuElement.FindElementByName(snapLayoutParent);
+                snapLayOutButton = parent.FindElementByName(Constants.SnapLayoutLeftHalf50);
+            }
+            if(snapLayOutTarget == MeasurementType.OneThird)
+            {
+                if (collection.Count == 6)
+                {
+                    snapLayoutParent = "3 window split layout";
+                    var parent = snapLayOutMenuElement.FindElementByName(snapLayoutParent);
+                    snapLayOutButton = parent.FindElementByName(Constants.SnapLayoutOneThird);
+                }
+                else
+                {
+                    snapLayoutParent = "3 window focus on left layout";
+                    var parent = snapLayOutMenuElement.FindElementByName(snapLayoutParent);
+                    snapLayOutButton = parent.FindElementByName(Constants.SnapLayoutLeftHalf50);
+                }
+            }
+            if (snapLayOutTarget == MeasurementType.Quarter)
+            {
+                var parent = snapLayOutMenuElement.FindElementByName(snapLayoutParent);
+                snapLayOutButton = parent.FindElementByName(Constants.SnapLayoutBottomRightQuarter);
             }
 
 
@@ -118,6 +157,72 @@ namespace uia_test_console
         {
             Console.WriteLine($"SnapType [{element}] *** Size(w, h) = {size.Width}-{size.Height}  ***  Location(x, y) = {location.X}-{location.Y}");
             Console.WriteLine();
+        }
+
+        private static bool IsAppDimensionValid(System.Drawing.Size appSize, System.Drawing.Size fullScreenSize, MeasurementType measurementType, bool isSixPaneLayout)
+        {
+            bool result;
+            switch (measurementType)
+            {
+                case MeasurementType.Half:
+                    if (Math.Abs(appSize.Width * 2 - fullScreenSize.Width) <=20 && Math.Abs(appSize.Height - fullScreenSize.Height) <= 20)
+                        result = true;
+                    else
+                        result = false;
+                    break;
+                case MeasurementType.Quarter:
+                    if (Math.Abs(appSize.Width * 2 - fullScreenSize.Width) <= 20 && Math.Abs(appSize.Height * 2 - fullScreenSize.Height) <= 20)
+                        result = true;
+                    else
+                        result = false;
+                    break;
+                case MeasurementType.OneThird:
+                    if (isSixPaneLayout && (Math.Abs(appSize.Width * 2 - fullScreenSize.Width) <= 20 && Math.Abs(appSize.Height - fullScreenSize.Height) <=20))
+                        result = true;
+                    else if(!isSixPaneLayout && (Math.Abs(appSize.Width * 1.33 - fullScreenSize.Width) <=20 && (Math.Abs(appSize.Height - fullScreenSize.Height) <=20)))
+                        result = true;
+                    else
+                        result = false;
+                    break;
+
+                default:
+                    result = false;
+                    break;
+            }
+
+            return result;
+        }
+
+        private static bool IsAppLocationValid(System.Drawing.Point appLocation, System.Drawing.Size fullScreenSize, SnapLocation snapLocation)
+        {
+            bool result;
+            switch (snapLocation)
+            {
+                case SnapLocation.Left:
+                    if (appLocation.X == 0 && appLocation.Y == 0)
+                        result = true;
+                    else
+                        result = false;
+                    break;
+                case SnapLocation.Center:
+                    if (appLocation.X * 0.33 == fullScreenSize.Width && appLocation.Y == 0)
+                        result = true;
+                    else
+                        result = false;
+                    break;
+                case SnapLocation.BottomRight:
+                    if (appLocation.X * 0.5 == fullScreenSize.Width && appLocation.Y * 0.5 == fullScreenSize.Height)
+                        result = true;
+                    else
+                        result = false;
+                    break;
+
+                default:
+                    result = false;
+                    break;
+            }
+
+            return result;
         }
     }
 
