@@ -80,8 +80,8 @@ namespace uia_test_console
                 //notePadSession.FindElementByName("Maximize").Click();
 
 
-                deskTopSession.CloseApp(); deskTopSession.LaunchApp();
-                var deskTopSize = deskTopSession.Manage();//.Window.Size;
+                deskTopSession.CloseApp();
+                notePadSession.CloseApp();
 
             }
             catch (Exception e)
@@ -179,7 +179,7 @@ namespace uia_test_console
                 case MeasurementType.OneThird:
                     if (!isSixPaneLayout && (Math.Abs(appSize.Width * 2 - fullScreenSize.Width) <= 20 && Math.Abs(appSize.Height - fullScreenSize.Height) <=20))
                         result = true;
-                    else if(isSixPaneLayout && (Math.Abs(appSize.Width * 0.33 - fullScreenSize.Width) <=20 && (Math.Abs(appSize.Height - fullScreenSize.Height) <=20)))
+                    else if(isSixPaneLayout && (Math.Abs(appSize.Width * 3 - fullScreenSize.Width) <=20 && (Math.Abs(appSize.Height - fullScreenSize.Height) <=20)))
                         result = true;
                     else
                         result = false;
@@ -205,13 +205,13 @@ namespace uia_test_console
                         result = false;
                     break;
                 case SnapLocation.Center:
-                    if (Math.Abs(appLocation.X * 0.33 - fullScreenSize.Width) <= 20 && appLocation.Y == 0)
+                    if (Math.Abs(appLocation.X - fullScreenSize.Width * 0.33 ) <= 20 && appLocation.Y == 0)
                         result = true;
                     else
                         result = false;
                     break;
                 case SnapLocation.BottomRight:
-                    if (Math.Abs(appLocation.X * 1.5 - fullScreenSize.Width) <=20 && Math.Abs(appLocation.Y * 1.5 - fullScreenSize.Height) <= 20)
+                    if (Math.Abs(appLocation.X - fullScreenSize.Width * 0.5) <=20 && Math.Abs(appLocation.Y  - fullScreenSize.Height * 0.5) <= 20)
                         result = true;
                     else
                         result = false;
