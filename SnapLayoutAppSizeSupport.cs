@@ -65,7 +65,7 @@ namespace uia_test_console
                 var windowLocationThird = notePadSession.Manage().Window.Position;
                 LogToConsole(windowSizeThirdTop, windowLocationThird, Constants.SnapLayoutTopRightQuarter);
                 var isThirdSizeValid = IsAppDimensionValid(windowSizeThirdTop, notePadFullScreenDimensi, MeasurementType.OneThird, isSixPaneLayout);
-                SnapLocation location = isSixPaneLayout ? SnapLocation.Left : SnapLocation.Center;
+                SnapLocation location = isSixPaneLayout ? SnapLocation.Center : SnapLocation.Left;
                 var isThirdLocationValid = IsAppLocationValid(windowLocationThird, notePadFullScreenDimensi,location);
 
                 System.Threading.Thread.Sleep(Constants.TimeBetweenSnaps);
@@ -73,7 +73,7 @@ namespace uia_test_console
                 SnapToLocation(notePadSession, deskTopSession, "4 window grid layout",MeasurementType.Quarter, out paneCount);
                 var windowSizeQuarterBottom = notePadSession.Manage().Window.Size;
                 var windowLocationQuarterBottom = notePadSession.Manage().Window.Position;
-                var iQuarterSizeValid = IsAppDimensionValid(windowSizeQuarterBottom, notePadFullScreenDimensi, MeasurementType.Half, isSixPaneLayout);
+                var iQuarterSizeValid = IsAppDimensionValid(windowSizeQuarterBottom, notePadFullScreenDimensi, MeasurementType.Quarter, isSixPaneLayout);
                 var isQuarterLocationValid = IsAppLocationValid(windowLocationQuarterBottom, notePadFullScreenDimensi, SnapLocation.BottomRight);
                 LogToConsole(windowSizeQuarterBottom, windowLocationQuarterBottom, Constants.SnapLayoutBottomRightQuarter);
 
@@ -177,9 +177,9 @@ namespace uia_test_console
                         result = false;
                     break;
                 case MeasurementType.OneThird:
-                    if (isSixPaneLayout && (Math.Abs(appSize.Width * 2 - fullScreenSize.Width) <= 20 && Math.Abs(appSize.Height - fullScreenSize.Height) <=20))
+                    if (!isSixPaneLayout && (Math.Abs(appSize.Width * 2 - fullScreenSize.Width) <= 20 && Math.Abs(appSize.Height - fullScreenSize.Height) <=20))
                         result = true;
-                    else if(!isSixPaneLayout && (Math.Abs(appSize.Width * 1.33 - fullScreenSize.Width) <=20 && (Math.Abs(appSize.Height - fullScreenSize.Height) <=20)))
+                    else if(isSixPaneLayout && (Math.Abs(appSize.Width * 0.33 - fullScreenSize.Width) <=20 && (Math.Abs(appSize.Height - fullScreenSize.Height) <=20)))
                         result = true;
                     else
                         result = false;
@@ -205,13 +205,13 @@ namespace uia_test_console
                         result = false;
                     break;
                 case SnapLocation.Center:
-                    if (appLocation.X * 0.33 == fullScreenSize.Width && appLocation.Y == 0)
+                    if (Math.Abs(appLocation.X * 0.33 - fullScreenSize.Width) <= 20 && appLocation.Y == 0)
                         result = true;
                     else
                         result = false;
                     break;
                 case SnapLocation.BottomRight:
-                    if (appLocation.X * 0.5 == fullScreenSize.Width && appLocation.Y * 0.5 == fullScreenSize.Height)
+                    if (Math.Abs(appLocation.X * 1.5 - fullScreenSize.Width) <=20 && Math.Abs(appLocation.Y * 1.5 - fullScreenSize.Height) <= 20)
                         result = true;
                     else
                         result = false;
