@@ -1,1 +1,6 @@
 *.dll
+*.vs
+.suo
+/packages
+/bin
+/obj
