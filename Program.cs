@@ -22,9 +22,13 @@ namespace uia_test_console
 
             //C:\Program Files\WindowsApps\Microsoft.WindowsCalculator_11.2109.9.0_x64__8wekyb3d8bbwe\CalculatorApp.exe
 
-            var appPath = @"C:\Windows\System32\notepad.exe";
-            //  var appPath = @"Microsoft.WindowsCalculator_8wekyb3d8bbwe!App";
-            var snapResult = SnapLayoutAppSizeSupport.launchApplication(appPath);
+           // var appPath = @"C:\Windows\System32\notepad.exe";
+            var appPath = @"Microsoft.WindowsCalculator_8wekyb3d8bbwe!App";
+
+            var snapVisible = SnapLayoutAppSizeSupport.ExecuteSnapFlyOutSupport(appPath);
+          //  var rectangle = SnapLayoutAppSizeSupport.ExecuteTitleBarHeight(appPath);
+           
+          //  var snapResult = SnapLayoutAppSizeSupport.Execute(appPath);
             Console.ReadKey();
             /*
             var process = Process.Start("notepad.exe");

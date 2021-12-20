@@ -15,9 +15,12 @@ namespace uia_test_console
 {
     public class SnapLayoutAppSizeSupport
     {
-        public static int launchApplication(string path)
+        public static int Execute(string path)
         {
             int finalScore = 0;
+
+            WindowsDriver<WindowsElement> appSession = null;
+            WindowsDriver<WindowsElement> deskTopSession = null;
             try
             {
 
@@ -26,14 +29,14 @@ namespace uia_test_console
                 options.AddAdditionalCapability("deviceName", "WindowsPC");
 
 
-                var appSession = new WindowsDriver<WindowsElement>(new Uri("http://127.0.0.1:4723"), options);
+                appSession = new WindowsDriver<WindowsElement>(new Uri("http://127.0.0.1:4723"), options);
 
 
                 appSession.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(1);
 
                 var deskTopOptions = new AppiumOptions();
                 deskTopOptions.AddAdditionalCapability("app", "Root");
-                var deskTopSession = new WindowsDriver<WindowsElement>(new Uri("http://127.0.0.1:4723"), deskTopOptions);
+                deskTopSession = new WindowsDriver<WindowsElement>(new Uri("http://127.0.0.1:4723"), deskTopOptions);
 
 
                 appSession.Manage().Window.Maximize();
@@ -43,7 +46,7 @@ namespace uia_test_console
                 deskTopSession.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(1000);
 
                 int totalScore = 0;
-               
+
                 int paneCount = 0;
                 SnapToLocation(appSession, deskTopSession, "Snap Layouts Menu", MeasurementType.Half, out paneCount);
                 var windowSize50 = appSession.Manage().Window.Size;
@@ -93,23 +96,118 @@ namespace uia_test_console
                     finalScore = 0;
 
 
-                deskTopSession.CloseApp();
-                appSession.CloseApp();
+
 
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message + "\n" + e.StackTrace);
             }
+            finally
+            {
+                if (appSession != null)
+                    appSession.CloseApp();
+                if (deskTopSession != null)
+                    deskTopSession.CloseApp();
+            }
 
+            return finalScore;
+        }
+
+        public static int ExecuteTitleBarHeight(string path)
+        {
+            int finalScore = 0;
+
+            WindowsDriver<WindowsElement> appSession = null;
+            try
+            {
+
+                AppiumOptions options = new AppiumOptions();
+                options.AddAdditionalCapability("app", path);
+                options.AddAdditionalCapability("deviceName", "WindowsPC");
+
+
+                appSession = new WindowsDriver<WindowsElement>(new Uri("http://127.0.0.1:4723"), options);
+
+                appSession.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(2);
+                var source = appSession.PageSource;
+                var titleBar = appSession.FindElementByXPath("//TitleBar");
+
+
+
+                finalScore = 100;
+            }
+            catch (Exception e)
+            {
+                var titleBar = appSession.FindElementByAccessibilityId("TitleBar");
+            }
+            finally
+            {
+                if (appSession != null)
+                    appSession.CloseApp();
+            }
+            return finalScore;
+        }
+
+        public static int ExecuteSnapFlyOutSupport(string path)
+        {
+            int finalScore = 0;
+
+            WindowsDriver<WindowsElement> appSession = null;
+            WindowsDriver<WindowsElement> deskTopSession = null;
+            try
+            {
+
+                AppiumOptions options = new AppiumOptions();
+                options.AddAdditionalCapability("app", path);
+                options.AddAdditionalCapability("deviceName", "WindowsPC");
+
+
+                appSession = new WindowsDriver<WindowsElement>(new Uri("http://127.0.0.1:4723"), options);
+
+
+                appSession.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(1);
+
+                var deskTopOptions = new AppiumOptions();
+                deskTopOptions.AddAdditionalCapability("app", "Root");
+                deskTopSession = new WindowsDriver<WindowsElement>(new Uri("http://127.0.0.1:4723"), deskTopOptions);
+
+
+              
+
+                appSession.Manage().Window.Size = new System.Drawing.Size { Height = 540, Width = 960 };
+                deskTopSession.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(1000);
+
+                var snapLayoutShortCut = new Actions(appSession);
+                snapLayoutShortCut.SendKeys(OpenQA.Selenium.Keys.Command + "z" + OpenQA.Selenium.Keys.Command).Build().Perform();
+
+
+                System.Threading.Thread.Sleep(Constants.TimeBetweenSnaps);
+                
+                deskTopSession.CloseApp(); deskTopSession.LaunchApp();
+
+                var popHostElement = deskTopSession.FindElementByName("PopupHost");
+                var popUpElement = popHostElement.FindElementByName("Popup");
+                var snapLayOutMenuElement = popUpElement.FindElementByName(Constants.SnapLayOutMenu);
+
+                finalScore = 100;
+            }
+            catch (Exception e)
+            {
+
+            }
+            finally
+            {
+                if (appSession != null)
+                    appSession.CloseApp();
+            }
             return finalScore;
         }
 
         public static void SnapToLocation(WindowsDriver<WindowsElement> appSession,
             WindowsDriver<WindowsElement> deskTopSession, string snapLayoutParent, MeasurementType snapLayOutTarget, out int paneCount)
         {
-            // notePadSession.CloseApp(); notePadSession.LaunchApp();
-            WindowsElement maxButton;
+
             WindowsElement closeButton;
             try
             {
